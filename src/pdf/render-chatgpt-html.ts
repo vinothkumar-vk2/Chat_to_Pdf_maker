@@ -1,0 +1,551 @@
+import { marked } from "marked";
+import type { AttachmentReference, ExportBlock, ExportTranscript, ExportTurn } from "../types.js";
+import { formatConversationRange, formatExportedAt } from "../utils/date-display.js";
+
+marked.setOptions({
+  gfm: true,
+  breaks: true
+});
+
+export function renderChatGptHtml(transcript: ExportTranscript): string {
+  const conversationRange = formatConversationRange(transcript.turns.map((turn) => turn.timestamp));
+  const renderedTurns = transcript.turns.map((turn, index, turns) =>
+    renderTurn(turn, index > 0 && turns[index - 1]?.role === turn.role)
+  );
+  return [
+    "<!doctype html>",
+    '<html lang="en">',
+    "<head>",
+    '  <meta charset="utf-8" />',
+    '  <meta name="viewport" content="width=device-width, initial-scale=1" />',
+    `  <title>${escapeHtml(transcript.title)}</title>`,
+    "  <style>",
+    indentLines(chatGptPdfCss(), 4),
+    "  </style>",
+    "</head>",
+    "<body>",
+    '  <main class="export-shell">',
+    '    <header class="export-header">',
+    `      <p class="export-brand">ChatGPT Export</p>`,
+    `      <h1 class="export-title">${escapeHtml(transcript.title)}</h1>`,
+    `      <p class="export-meta"><span>Source:</span> <span>${escapeHtml(transcript.sourceUrl)}</span></p>`,
+    `      <p class="export-meta"><span>${conversationRange ? "Conversation:" : "Exported:"}</span> <span>${escapeHtml(conversationRange ?? formatExportedAt(transcript.exportedAt))}</span></p>`,
+    "    </header>",
+    '    <section class="conversation-thread">',
+    renderedTurns.map((turn) => indentLines(turn, 6)).join("\n"),
+    "    </section>",
+    "  </main>",
+    "</body>",
+    "</html>",
+    ""
+  ].join("\n");
+}
+
+function renderTurn(turn: ExportTurn, compact: boolean): string {
+  const classes = ["turn", `turn-${turn.role}`];
+  if (compact) {
+    classes.push("turn-compact");
+  }
+  const isBubble = turn.role === "user";
+
+  return [
+    `<article class="${classes.join(" ")}">`,
+    `  <div class="${isBubble ? "turn-bubble" : "turn-content"}">`,
+    `    <p class="turn-label">${escapeHtml(labelForRole(turn.role))}</p>`,
+    turn.blocks.map((block) => indentLines(renderBlock(block), 4)).join("\n"),
+    indentLines(renderAttachments(turn.metadata?.attachments), 4),
+    "  </div>",
+    "</article>"
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function renderBlock(block: ExportBlock): string {
+  switch (block.kind) {
+    case "text":
+      return `<div class="block block-text markdown-content">${renderMarkdownText(block.text)}</div>`;
+    case "code":
+      return [
+        '<section class="block block-code">',
+        block.language ? `  <p class="code-language">${escapeHtml(block.language)}</p>` : "",
+        `  <pre><code>${escapeHtml(block.text)}</code></pre>`,
+        "</section>"
+      ]
+        .filter(Boolean)
+        .join("\n");
+    case "image":
+      return [
+        '<figure class="block block-image">',
+        `  <img src="${escapeHtml(block.url)}" alt="${escapeHtml(block.alt ?? "Generated image")}" />`,
+        block.alt ? `  <figcaption>${escapeHtml(block.alt)}</figcaption>` : "",
+        "</figure>"
+      ]
+        .filter(Boolean)
+        .join("\n");
+    case "quote":
+      return `<blockquote class="block block-quote">${renderMarkdownText(block.text)}</blockquote>`;
+    case "list":
+      return [
+        '<ul class="block block-list">',
+        block.items.map((item) => `  <li>${escapeHtml(item)}</li>`).join("\n"),
+        "</ul>"
+      ].join("\n");
+    case "unknown":
+      return [
+        '<section class="block block-unknown">',
+        `  <p class="unknown-title">Unsupported content${block.rawType ? `: ${escapeHtml(block.rawType)}` : ""}</p>`,
+        `  <p class="unknown-summary">${escapeHtml(block.summary)}</p>`,
+        "</section>"
+      ].join("\n");
+    default:
+      return assertNever(block);
+  }
+}
+
+function renderAttachments(attachments?: AttachmentReference[]): string {
+  const usableAttachments = (attachments ?? []).filter(
+    (attachment) => attachment.name || attachment.mimeType || attachment.url
+  );
+
+  if (usableAttachments.length === 0) {
+    return "";
+  }
+
+  return [
+    '<section class="turn-attachments">',
+    '  <p class="attachments-label">Attachments</p>',
+    '  <ul class="attachments-list">',
+    usableAttachments
+      .map((attachment) => {
+        const details = [attachment.name, attachment.mimeType, attachment.url]
+          .filter(Boolean)
+          .map((value) => escapeHtml(String(value)))
+          .join(" · ");
+
+        return `    <li>${details}</li>`;
+      })
+      .join("\n"),
+    "  </ul>",
+    "</section>"
+  ].join("\n");
+}
+
+function renderMarkdownText(text: string): string {
+  const safeMarkdown = escapeHtml(text);
+  return marked.parse(safeMarkdown) as string;
+}
+
+function labelForRole(role: ExportTurn["role"]): string {
+  switch (role) {
+    case "user":
+      return "You";
+    case "assistant":
+      return "ChatGPT";
+    case "system":
+      return "System";
+    case "tool":
+      return "Tool";
+    default:
+      return role;
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function indentLines(value: string, spaces: number): string {
+  const prefix = " ".repeat(spaces);
+  return value
+    .split("\n")
+    .map((line) => (line.length > 0 ? `${prefix}${line}` : line))
+    .join("\n");
+}
+
+function chatGptPdfCss(): string {
+  return `
+:root {
+  --page-bg: #ffffff;
+  --text: #202123;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --user-bubble: #f4f4f5;
+  --assistant-surface: #ffffff;
+  --code-bg: #1f2937;
+  --code-text: #f9fafb;
+  --note-bg: #fafaf9;
+  --note-border: #d6d3d1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--page-bg);
+  color: var(--text);
+  font-family: "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+body {
+  padding: 32px 0 48px;
+}
+
+.export-shell {
+  width: min(960px, calc(100vw - 64px));
+  margin: 0 auto;
+}
+
+.export-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.export-brand {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.export-title {
+  margin: 0 0 12px;
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.export-meta {
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.conversation-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.turn {
+  display: flex;
+}
+
+.turn-compact {
+  margin-top: -8px;
+}
+
+.turn-user {
+  justify-content: flex-end;
+}
+
+.turn-assistant,
+.turn-system,
+.turn-tool {
+  justify-content: flex-start;
+}
+
+.turn-bubble,
+.turn-content {
+  max-width: 78%;
+}
+
+.turn-bubble {
+  background: var(--user-bubble);
+  border-radius: 24px;
+  padding: 22px 24px;
+}
+
+.turn-content {
+  padding: 0;
+  min-width: 0;
+}
+
+.turn-label {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.block {
+  margin: 0 0 18px;
+}
+
+.block:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.block-text p,
+.block-quote p {
+  margin: 0 0 10px;
+}
+
+.block-text h1,
+.block-text h2,
+.block-text h3,
+.block-text h4,
+.block-text h5,
+.block-text h6,
+.block-quote h1,
+.block-quote h2,
+.block-quote h3,
+.block-quote h4,
+.block-quote h5,
+.block-quote h6 {
+  margin: 18px 0 10px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.block-text h1,
+.block-quote h1 {
+  font-size: 28px;
+}
+
+.block-text h2,
+.block-quote h2 {
+  font-size: 22px;
+}
+
+.block-text h3,
+.block-quote h3 {
+  font-size: 18px;
+}
+
+.block-text ul,
+.block-text ol,
+.block-quote ul,
+.block-quote ol {
+  margin: 8px 0 12px;
+  padding-left: 24px;
+}
+
+.block-text li,
+.block-quote li,
+.block-list li,
+.attachments-list li {
+  margin: 0 0 4px;
+}
+
+.block-text hr,
+.block-quote hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 18px 0;
+}
+
+.block-text h1,
+.block-text h2,
+.block-text h3,
+.block-text h4,
+.block-text h5,
+.block-text h6,
+.block-quote h1,
+.block-quote h2,
+.block-quote h3,
+.block-quote h4,
+.block-quote h5,
+.block-quote h6 {
+  break-after: avoid-page;
+  page-break-after: avoid;
+}
+
+.block-text p,
+.block-text li,
+.block-quote p,
+.block-quote li {
+  orphans: 3;
+  widows: 3;
+}
+
+.block-text strong,
+.block-quote strong {
+  font-weight: 700;
+}
+
+.block-code {
+  background: var(--code-bg);
+  color: var(--code-text);
+  border-radius: 18px;
+  padding: 16px 18px;
+  overflow: hidden;
+}
+
+.block-image {
+  margin: 0 0 18px;
+}
+
+.block-image img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.block-image figcaption {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.code-language {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.block-code pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.block-quote {
+  margin: 0;
+  padding: 0 0 0 18px;
+  border-left: 3px solid var(--border);
+  color: #374151;
+}
+
+.block-list {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.block-unknown {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--note-bg);
+  border: 1px solid var(--note-border);
+}
+
+.unknown-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.unknown-summary {
+  margin: 0;
+  color: #44403c;
+}
+
+.turn-attachments {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.attachments-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.attachments-list {
+  margin: 0;
+  padding-left: 22px;
+}
+
+@page {
+  margin: 18mm 16mm;
+}
+
+@media print {
+  body {
+    padding: 0;
+  }
+
+  .export-shell {
+    width: 100%;
+  }
+
+      .turn-user,
+      .block-code,
+      .block-unknown,
+      .block-image {
+        break-inside: avoid;
+      }
+
+  .conversation-thread {
+    gap: 16px;
+  }
+
+  .turn-bubble {
+    padding: 18px 20px;
+  }
+
+  .block {
+    margin-bottom: 14px;
+  }
+
+  .block-text p,
+  .block-quote p {
+    margin-bottom: 8px;
+  }
+
+  .block-text h1,
+  .block-text h2,
+  .block-text h3,
+  .block-text h4,
+  .block-text h5,
+  .block-text h6,
+  .block-quote h1,
+  .block-quote h2,
+  .block-quote h3,
+  .block-quote h4,
+  .block-quote h5,
+  .block-quote h6 {
+    margin: 14px 0 8px;
+  }
+
+  .block-text ul,
+  .block-text ol,
+  .block-quote ul,
+  .block-quote ol,
+  .block-list,
+  .attachments-list {
+    margin-top: 6px;
+    margin-bottom: 10px;
+  }
+}
+`.trim();
+}
+
+function assertNever(value: never): never {
+  throw new Error(`Unhandled PDF block kind: ${JSON.stringify(value)}`);
+}

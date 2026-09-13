@@ -1,0 +1,41 @@
+import { stat } from "node:fs/promises";
+import { homedir } from "node:os";
+import path from "node:path";
+import { slugify } from "./slug.js";
+
+export async function resolveDefaultOutPath(
+  title: string,
+  extension: "md" | "pdf" = "md"
+): Promise<string> {
+  const home = process.env.HOME || homedir();
+  const downloadsDir = path.join(home, "Downloads");
+  const slug = slugify(title);
+
+  for (let index = 0; index < 10_000; index += 1) {
+    const suffix = index === 0 ? "" : `-${index + 1}`;
+    const candidate = path.join(downloadsDir, `${slug}-export${suffix}.${extension}`);
+
+    if (!(await pathExists(candidate))) {
+      return candidate;
+    }
+  }
+
+  throw new Error("Could not find an available default export filename in Downloads.");
+}
+
+async function pathExists(filePath: string): Promise<boolean> {
+  try {
+    await stat(filePath);
+    return true;
+  } catch (error: unknown) {
+    if (isErrnoException(error) && error.code === "ENOENT") {
+      return false;
+    }
+
+    throw error;
+  }
+}
+
+function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error;
+}

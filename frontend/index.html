@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- ── Primary SEO ───────────────────────────────────────────────── -->
+  <title>ChatGPT to PDF Converter – Free Online</title>
+  <meta name="description"
+    content="Convert ChatGPT conversations to clean PDF files while preserving headings, code, tables and formatting." />
+  <link rel="canonical" href="/chatgpt-to-pdf" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- ── Open Graph ────────────────────────────────────────────────── -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ChatGPT to PDF Converter – Free Online" />
+  <meta property="og:description"
+    content="Convert ChatGPT conversations to clean PDF files while preserving headings, code, tables and formatting." />
+  <meta property="og:url" content="/chatgpt-to-pdf" />
+
+  <!-- ── Schema.org structured data ───────────────────────────────── -->
+  <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "ChatGPT to PDF Converter",
+        "description": "Convert ChatGPT conversations to clean PDF files while preserving headings, code, tables and formatting.",
+        "url": "/chatgpt-to-pdf",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+
+  <!-- ── Fonts (single weight, preconnect first) ────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Design tokens ─────────────────────────────────────────── */
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --border: #e2e8f0;
+      --brand: #4f46e5;
+      --brand-hover: #4338ca;
+      --brand-focus: #4f46e5;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-subtle: #64748b;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --error-text: #991b1b;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+      --success-text: #166534;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── Reset ─────────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Focus ring (global, keyboard-only) ─────────────────────── */
+    :focus-visible {
+      outline: 2px solid var(--brand-focus);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    /* ── Typography helpers ─────────────────────────────────────── */
+    h1,
+    h2,
+    h3 {
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    a {
+      color: var(--brand);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Layout shells ──────────────────────────────────────────── */
+    .wrapper {
+      width: min(720px, 100% - 2rem);
+      margin-inline: auto;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+    }
+
+    .site-header .wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .9375rem;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--brand);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-icon svg {
+      display: block;
+    }
+
+    /* ── Main content ───────────────────────────────────────────── */
+    main {
+      flex: 1;
+      padding: 3rem 0 4rem;
+    }
+
+    /* ── Hero / intro ───────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      letter-spacing: -.02em;
+      margin-bottom: .75rem;
+      color: var(--text);
+    }
+
+    .hero p {
+      font-size: 1.0625rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin-inline: auto;
+    }
+
+    /* ── Converter card ─────────────────────────────────────────── */
+    .converter-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 3.5rem;
+    }
+
+    /* ── Form ───────────────────────────────────────────────────── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      font-size: .875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .url-field-wrapper {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .url-input {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+      padding: .75rem 1rem;
+      font-family: var(--font);
+      font-size: .9375rem;
+      color: var(--text);
+      transition: border-color .15s;
+      min-width: 0;
+    }
+
+    .url-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, .2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .url-input[aria-invalid="true"] {
+      border-color: var(--error-border);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, .2);
+    }
+
+    /* ── Primary CTA button ─────────────────────────────────────── */
+    .btn-convert {
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: .75rem 1.5rem;
+      font-family: var(--font);
+      font-size: .9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s, opacity .15s;
+      flex-shrink: 0;
+    }
+
+    .btn-convert:hover:not(:disabled) {
+      background: var(--brand-hover);
+    }
+
+    .btn-convert:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    /* ── Status messages ─────────────────────────────────────────── */
+    .status-area {
+      /* min-height prevents layout shift when content appears */
+      min-height: 0;
+      transition: min-height .1s;
+    }
+
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      padding: .875rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: .9rem;
+      line-height: 1.5;
+    }
+
+    .alert-icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      margin-top: .1em;
+    }
+
+    .alert-error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
+    }
+
+    .alert-success {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success-text);
+    }
+
+    /* ── Loading state ───────────────────────────────────────────── */
+    .loading-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--brand) 0%, rgba(79, 70, 229, .2) 100%);
+      animation: load-sweep 1.6s ease-in-out infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes load-sweep {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .loading-wrap {
+      overflow: hidden;
+      border-radius: 2px;
+      margin-bottom: .75rem;
+    }
+
+    .loading-label {
+      font-size: .875rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(79, 70, 229, .25);
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Download button ─────────────────────────────────────────── */
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: transparent;
+      border: 1px solid var(--brand);
+      color: var(--brand);
+      border-radius: var(--radius-sm);
+      padding: .625rem 1.25rem;
+      font-family: var(--font);
+      font-size: .9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: .875rem;
+      transition: background .15s, color .15s;
+      text-decoration: none;
+    }
+
+    .btn-download:hover {
+      background: var(--brand);
+      color: #fff;
+      text-decoration: none;
+    }
+
+    /* ── Section content ─────────────────────────────────────────── */
+    .content-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    .content-section h2 {
+      font-size: 1.25rem;
+      letter-spacing: -.015em;
+      margin-bottom: 1rem;
+      padding-bottom: .625rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Steps ───────────────────────────────────────────────────── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .step {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .8125rem;
+      font-weight: 700;
+      color: var(--brand);
+      flex-shrink: 0;
+      margin-top: .1rem;
+    }
+
+    .step-body {
+      flex: 1;
+    }
+
+    .step-title {
+      font-size: .9375rem;
+      font-weight: 600;
+      margin-bottom: .2rem;
+    }
+
+    .step-desc {
+      font-size: .875rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* ── Feature chips ───────────────────────────────────────────── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: .75rem;
+    }
+
+    .feature-chip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: .625rem .875rem;
+      font-size: .875rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--text);
+    }
+
+    .chip-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--brand);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── FAQ ─────────────────────────────────────────────────────── */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      text-align: left;
+      background: var(--surface);
+      border: none;
+      color: var(--text);
+      padding: 1rem 1.25rem;
+      font-family: var(--font);
+      font-size: .9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      gap: .75rem;
+      transition: background .12s;
+    }
+
+    .faq-question:hover {
+      background: var(--surface-2);
+    }
+
+    .faq-chevron {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      transition: transform .2s;
+    }
+
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      display: none;
+      padding: 0 1.25rem 1rem;
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      background: var(--surface);
+    }
+
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .site-footer .wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-note {
+      font-size: .8125rem;
+      color: var(--text-subtle);
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 540px) {
+      main {
+        padding: 2rem 0 3rem;
+      }
+
+      .converter-card {
+        padding: 1.25rem;
+      }
+
+      .url-field-wrapper {
+        flex-direction: column;
+      }
+
+      .url-input {
+        border-right: 1px solid var(--border);
+        border-bottom: none;
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      }
+
+      .btn-convert {
+        border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+        text-align: center;
+        width: 100%;
+        padding: .875rem 1rem;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ── Site header ──────────────────────────────────────────────── -->
+  <header class="site-header" role="banner">
+    <div class="wrapper">
+      <a href="/chatgpt-to-pdf" class="logo" aria-label="ChatGPT to PDF — home">
+        <span class="logo-icon" aria-hidden="true">
+          <!-- Simple PDF icon -->
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M4 2h6l3 3v9H4V2z" stroke="#fff" stroke-width="1.4" stroke-linejoin="round" />
+            <path d="M10 2v3h3" stroke="#fff" stroke-width="1.4" stroke-linejoin="round" />
+            <path d="M6 8h4M6 10.5h3" stroke="#fff" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+        </span>
+        ChatGPT to PDF
+      </a>
+    </div>
+  </header>
+
+  <!-- ── Main content ─────────────────────────────────────────────── -->
+  <main id="main-content">
+    <div class="wrapper">
+
+      <!-- Hero -->
+      <section class="hero" aria-labelledby="page-heading">
+        <h1 id="page-heading">Convert ChatGPT to PDF</h1>
+        <p>
+          Convert ChatGPT conversations to clean PDF files while preserving
+          headings, code, tables and formatting.
+        </p>
+      </section>
+
+      <!-- ── Converter ──────────────────────────────────────────── -->
+      <section class="converter-card" aria-labelledby="converter-heading" id="converter">
+        <h2 id="converter-heading" class="sr-only">Converter</h2>
+
+        <form id="convert-form" novalidate aria-label="Convert ChatGPT conversation to PDF">
+          <div class="form-group">
+            <label class="form-label" for="chat-url">
+              ChatGPT shared conversation URL
+            </label>
+
+            <div class="url-field-wrapper">
+              <input type="url" id="chat-url" name="url" class="url-input" placeholder="https://chatgpt.com/share/…"
+                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                aria-describedby="url-hint url-error" aria-required="true" aria-invalid="false" />
+              <button type="submit" id="btn-convert" class="btn-convert" aria-label="Convert to PDF">
+                Convert to PDF
+              </button>
+            </div>
+
+            <span id="url-hint" class="footer-note" style="margin-top:.25rem">
+              Open a ChatGPT conversation → Share → Copy link, then paste it here.
+            </span>
+          </div>
+
+          <!-- Status region — screen readers announced changes here -->
+          <div id="status-area" class="status-area" role="status" aria-live="polite" aria-atomic="true"></div>
+        </form>
+      </section>
+
+      <!-- ── Informational sections ─────────────────────────────── -->
+      <div class="content-sections">
+
+        <!-- How to convert -->
+        <section class="content-section" aria-labelledby="how-heading">
+          <h2 id="how-heading">How to convert ChatGPT to PDF</h2>
+          <ol class="steps" aria-label="Conversion steps">
+            <li class="step">
+              <span class="step-num" aria-hidden="true">1</span>
+              <div class="step-body">
+                <p class="step-title">Open the ChatGPT conversation you want to export</p>
+                <p class="step-desc">Any conversation that has been shared via ChatGPT's built-in share feature will
+                  work.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">2</span>
+              <div class="step-body">
+                <p class="step-title">Share the conversation and copy the link</p>
+                <p class="step-desc">In ChatGPT, click <strong>Share</strong> → <strong>Copy link</strong>. You'll get a
+                  URL like <code>https://chatgpt.com/share/…</code></p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">3</span>
+              <div class="step-body">
+                <p class="step-title">Paste the link above and click Convert</p>
+                <p class="step-desc">The server fetches the conversation and generates a properly formatted PDF.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">4</span>
+              <div class="step-body">
+                <p class="step-title">Download your PDF</p>
+                <p class="step-desc">Once conversion is complete, a download button appears. Your PDF is ready
+                  immediately — no email required.</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <!-- What formatting is preserved -->
+        <section class="content-section" aria-labelledby="formatting-heading">
+          <h2 id="formatting-heading">What formatting is preserved?</h2>
+          <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:1rem">
+            The PDF renderer processes the conversation's structured content and reproduces the following elements
+            faithfully:
+          </p>
+          <ul class="feature-grid" aria-label="Preserved formatting features">
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Headings</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Paragraphs</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Bullet lists</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Code blocks</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Blockquotes</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Bold / italic</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Images</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Attachments</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Page numbers</li>
+            <li class="feature-chip"><span class="chip-dot" aria-hidden="true"></span>Source URL</li>
+          </ul>
+        </section>
+
+        <!-- FAQ -->
+        <section class="content-section" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">Frequently asked questions</h2>
+          <div class="faq-list" role="list">
+
+            <div class="faq-item" role="listitem">
+              <button class="faq-question" id="faq-q1" aria-expanded="false" aria-controls="faq-a1">
+                <h3 style="font-size:inherit;font-weight:inherit;margin:0">
+                  Does the conversation need to be public?
+                </h3>
+                <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </button>
+              <div class="faq-answer" id="faq-a1" role="region" aria-labelledby="faq-q1">
+                Yes. The converter fetches the conversation from ChatGPT's share URL. The link must be publicly
+                accessible — the same link you would send to a friend. Private conversations that have not been shared
+                cannot be converted.
+              </div>
+            </div>
+
+            <div class="faq-item" role="listitem">
+              <button class="faq-question" id="faq-q2" aria-expanded="false" aria-controls="faq-a2">
+                <h3 style="font-size:inherit;font-weight:inherit;margin:0">
+                  Is my conversation content stored or logged?
+                </h3>
+                <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </button>
+              <div class="faq-answer" id="faq-a2" role="region" aria-labelledby="faq-q2">
+                No. The server fetches the shared link, renders the PDF, sends it to you, and discards the content.
+                Nothing is saved to a database or logged beyond standard server request logs.
+              </div>
+            </div>
+
+            <div class="faq-item" role="listitem">
+              <button class="faq-question" id="faq-q3" aria-expanded="false" aria-controls="faq-a3">
+                <h3 style="font-size:inherit;font-weight:inherit;margin:0">
+                  Why does conversion take a few seconds?
+                </h3>
+                <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </button>
+              <div class="faq-answer" id="faq-a3" role="region" aria-labelledby="faq-q3">
+                The server fetches the live page from ChatGPT, then renders a pixel-perfect PDF using a headless browser
+                — the same engine that powers "Print to PDF" in Chrome. This takes a few seconds but produces a properly
+                formatted output.
+              </div>
+            </div>
+
+            <div class="faq-item" role="listitem">
+              <button class="faq-question" id="faq-q4" aria-expanded="false" aria-controls="faq-a4">
+                <h3 style="font-size:inherit;font-weight:inherit;margin:0">
+                  What happens if the link is invalid or expired?
+                </h3>
+                <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </button>
+              <div class="faq-answer" id="faq-a4" role="region" aria-labelledby="faq-q4">
+                You'll see a clear error message explaining what went wrong. Common causes are a private link, an
+                expired share link, or a URL that points to the wrong page. Make sure the URL starts with
+                <code>https://chatgpt.com/share/</code>.
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div><!-- /content-sections -->
+    </div><!-- /wrapper -->
+  </main>
+
+  <!-- ── Footer ───────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="wrapper">
+      <p class="footer-note">
+        ChatGPT to PDF Converter — open-source, free to use.
+      </p>
+      <p class="footer-note">
+        Built on the
+        <a href="https://github.com/chatgpt-thread-exporter" rel="noopener noreferrer"
+          target="_blank">chatgpt-thread-exporter</a>
+        pipeline.
+      </p>
+    </div>
+  </footer>
+
+  <!-- ── Screen-reader-only utility ───────────────────────────────── -->
+  <style>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+
+  <!-- ── Inline JavaScript (no external scripts needed) ───────────── -->
+  <script>
+    /* ── Converter logic ──────────────────────────────────────────── */
+    (function () {
+      'use strict';
+
+      var form = document.getElementById('convert-form');
+      var input = document.getElementById('chat-url');
+      var btnConvert = document.getElementById('btn-convert');
+      var statusArea = document.getElementById('status-area');
+      var errorSpan = document.getElementById('url-error');
+
+      // Track the object URL so we can revoke it after download
+      var currentObjectUrl = null;
+
+      /* ── FAQ accordion ────────────────────────────────────────── */
+      document.querySelectorAll('.faq-question').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var item = btn.closest('.faq-item');
+          var isOpen = item.classList.contains('open');
+
+          // Close all others
+          document.querySelectorAll('.faq-item.open').forEach(function (el) {
+            el.classList.remove('open');
+            el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+          });
+
+          // Toggle this one
+          if (!isOpen) {
+            item.classList.add('open');
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      /* ── Validation ───────────────────────────────────────────── */
+      function validateUrl(value) {
+        if (!value.trim()) {
+          return 'Please enter a ChatGPT share URL.';
+        }
+        if (!/^https?:\/\//i.test(value.trim())) {
+          return 'URL must start with https://';
+        }
+        return null; // valid
+      }
+
+      /* ── UI state helpers ─────────────────────────────────────── */
+      function setIdle() {
+        btnConvert.disabled = false;
+        btnConvert.textContent = 'Convert to PDF';
+        input.setAttribute('aria-invalid', 'false');
+        input.removeAttribute('aria-invalid');
+      }
+
+      function setLoading() {
+        btnConvert.disabled = true;
+        btnConvert.textContent = 'Converting…';
+        statusArea.innerHTML = '';
+
+        // Loading indicator
+        var wrap = document.createElement('div');
+        wrap.className = 'loading-wrap';
+        var bar = document.createElement('div');
+        bar.className = 'loading-bar';
+        wrap.appendChild(bar);
+
+        var label = document.createElement('p');
+        label.className = 'loading-label';
+        label.innerHTML =
+          '<span class="spinner" aria-hidden="true"></span>' +
+          '<span>Fetching conversation and generating PDF — this takes a few seconds…</span>';
+
+        statusArea.appendChild(wrap);
+        statusArea.appendChild(label);
+      }
+
+      function showError(message) {
+        setIdle();
+        input.setAttribute('aria-invalid', 'true');
+
+        statusArea.innerHTML = '';
+        var alert = document.createElement('div');
+        alert.className = 'alert alert-error';
+        alert.setAttribute('role', 'alert');
+
+        // Error icon (inline SVG — no external resource)
+        var iconSvg = '<svg class="alert-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">' +
+          '<circle cx="10" cy="10" r="9" stroke="#fca5a5" stroke-width="1.5"/>' +
+          '<path d="M10 6v5M10 13.5v.5" stroke="#fca5a5" stroke-width="1.5" stroke-linecap="round"/>' +
+          '</svg>';
+
+        // Safe: message is always a server-controlled string or a literal string constant
+        // from this file — never raw user input injected as HTML.
+        alert.innerHTML = iconSvg + '<span>' + sanitizeText(message) + '</span>';
+        statusArea.appendChild(alert);
+      }
+
+      function showSuccess(objectUrl, filename) {
+        setIdle();
+        input.setAttribute('aria-invalid', 'false');
+        input.removeAttribute('aria-invalid');
+
+        statusArea.innerHTML = '';
+        var alert = document.createElement('div');
+        alert.className = 'alert alert-success';
+        alert.style.flexDirection = 'column';
+        alert.style.alignItems = 'flex-start';
+
+        var top = document.createElement('div');
+        top.style.display = 'flex';
+        top.style.alignItems = 'center';
+        top.style.gap = '.75rem';
+
+        var iconSvg = '<svg class="alert-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">' +
+          '<circle cx="10" cy="10" r="9" stroke="#86efac" stroke-width="1.5"/>' +
+          '<path d="M6 10l3 3 5-5" stroke="#86efac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg>';
+
+        top.innerHTML = iconSvg + '<strong>PDF ready</strong>';
+        alert.appendChild(top);
+
+        // Download anchor — uses the object URL, never innerHTML with user content
+        var dlBtn = document.createElement('a');
+        dlBtn.href = objectUrl;
+        dlBtn.download = filename;
+        dlBtn.className = 'btn-download';
+        dlBtn.setAttribute('role', 'button');
+        dlBtn.innerHTML =
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">' +
+          '<path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg>' +
+          ' Download PDF';
+
+        alert.appendChild(dlBtn);
+        statusArea.appendChild(alert);
+
+        // Auto-trigger the download once
+        dlBtn.click();
+      }
+
+      /* ── Escape user-provided strings before inserting into HTML ── */
+      function sanitizeText(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      /* ── Form submission ──────────────────────────────────────── */
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var url = input.value;
+        var validationError = validateUrl(url);
+        if (validationError) {
+          showError(validationError);
+          input.focus();
+          return;
+        }
+
+        // Revoke any previous object URL to free memory
+        if (currentObjectUrl) {
+          URL.revokeObjectURL(currentObjectUrl);
+          currentObjectUrl = null;
+        }
+
+        setLoading();
+
+        fetch('/api/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url.trim() })
+        })
+          .then(function (response) {
+            if (!response.ok) {
+              return response.json().then(function (data) {
+                throw new Error(data.error || 'Conversion failed (HTTP ' + response.status + ').');
+              });
+            }
+            return response.blob();
+          })
+          .then(function (blob) {
+            var objectUrl = URL.createObjectURL(blob);
+            currentObjectUrl = objectUrl;
+
+            // Derive a clean filename from the page title or use a default
+            var filename = 'chatgpt-conversation.pdf';
+            showSuccess(objectUrl, filename);
+          })
+          .catch(function (err) {
+            var message = err && err.message
+              ? err.message
+              : 'An unexpected error occurred. Please try again.';
+            showError(message);
+          });
+      });
+
+      /* ── Clear validation state when user edits the field ──────── */
+      input.addEventListener('input', function () {
+        if (input.getAttribute('aria-invalid') === 'true') {
+          input.removeAttribute('aria-invalid');
+          statusArea.innerHTML = '';
+        }
+      });
+
+    }());
+  </script>
+</body>
+
+</html>
